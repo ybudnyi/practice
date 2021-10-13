@@ -1,0 +1,21 @@
+---
+- name: Checkout if firewall running firewalld
+  service:
+    name: firewalld 
+    state: started 
+    enabled: yes
+- name: Open ports for DB connection
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+  loop:
+    - 3306/tcp
+    - 4567/tcp
+    - 873/tcp
+    - 4444/tcp
+    - 9200/tcp
+- name: Reload firewall config
+  systemd:
+    name: firewalld
+    state: reloaded

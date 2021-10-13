@@ -1,0 +1,6 @@
+---
+# handlers file for galera
+- name: Stop galera
+  systemd:
+    name: mariadb
+    state: restarted

@@ -1,0 +1,16 @@
+---
+- name: Checkout if firewall running firewalld
+  service:
+    name: firewalld 
+    state: started 
+    enabled: yes
+
+- name: Open ports for DB connection
+  firewalld:
+    port: 3306/tcp
+    permanent: true
+    state: enabled
+- name: Reload firewall config
+  systemd:
+    name: firewalld
+    state: reloaded

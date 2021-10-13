@@ -1,0 +1,6 @@
+- name: Prestart role install
+  hosts: all
+  become: true
+  gather_facts: True
+  roles:
+    - prestart

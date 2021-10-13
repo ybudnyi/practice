@@ -1,0 +1,44 @@
+pipeline {
+    agent { label 'dashvis' }
+options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3'))
+}
+parameters{
+        string(description: 'version of build image', name: 'TAG')
+          }
+    stages {
+        stage('PULL IMAGE FROM REGISTRY') {
+            steps {
+                sh '/usr/bin/docker pull myregistry.domain.com/dashvis:${TAG}'
+            }
+        }
+        stage('BUILD IMAGES') {
+            steps {
+                sh "/usr/local/bin/docker-compose -f /root/config/docker.deploy.yml build"
+            }
+        }
+        stage('STOP RUNNING CONTAINERS') {
+            steps {
+                sh '/usr/bin/docker container rm -f app_dashvis'
+                sh '/usr/bin/docker container rm -f db_postgre'
+            }
+        }
+        stage('RUN SERVICES') {
+            steps {
+                sh '/usr/local/bin/docker-compose -f /root/config/docker.deploy.yml up -d'
+            }
+        }
+        stage('TEST IF SERVICE IS RUNNING') {
+            steps {
+                sh 'sleep 90'
+                sh '/root/config/check_script_deploy.sh'
+            }
+        }
+    }
+    post { 
+        always { 
+            cleanWs()
+        }
+    }
+}

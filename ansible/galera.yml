@@ -1,0 +1,7 @@
+---
+- name: Galera role install
+  hosts: galera
+  become: true
+  gather_facts: True
+  roles:
+    - galera

@@ -1,0 +1,5 @@
+---
+- import_playbook: prestart.yml
+- import_playbook: galera.yml
+- import_playbook: haproxy.yml
+- import_playbook: gogs.yml

@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3'))
+}
+    environment {
+        scannerHome = tool 'sonarscaner'
+    }
+    stages {
+        stage('GET SOURCE FROM GIT') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ybudnyi/demo2.git'
+
+            }
+        }
+        stage('COMPILE APP') {
+            steps {
+                sh "/usr/local/rvm/gems/ruby-2.4.1/wrappers/bundle install"
+            }
+        }
+        stage('LINTER') {
+            steps {
+                sh '/usr/local/rvm/gems/ruby-2.4.1/wrappers/rubocop
+
+
+            }
+        }
+        stage('RUN TESTS') {
+            steps {
+                sh '/usr/local/rvm/gems/ruby-2.4.1/wrappers/rails test'
+            }
+        }
+        stage('CODE INSPECTION WITH SONARQUBE') {
+            steps {
+                withSonarQubeEnv('SonaQube') {
+                    sh '${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=Dashvis \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://10.26.0.196:9000 \
+                        -Dsonar.login=7eefdcd38826aca9e1ffcbcf31bcb7f58151d64b'
+                }
+            }
+        }
+        stage("Quality gate") {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+    }
+    post { 
+        always { 
+            cleanWs()
+        }
+        success{
+                        build job: 'DockerCompose', propagate: false
+                }
+    }
+}

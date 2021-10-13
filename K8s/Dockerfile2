@@ -1,0 +1,6 @@
+FROM postgres:12.7-alpine
+USER postgres
+ENV POSTGRES_PASSWORD=1111
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_HOST_AUTH_METHOD=trust
+CMD ["postgres"]

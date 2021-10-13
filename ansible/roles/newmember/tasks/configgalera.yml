@@ -1,0 +1,10 @@
+---
+- name: Add config file for galera cluster
+  template:
+    src=galera.cnf.j2
+    dest=/etc/my.cnf.d/galera.cnf
+    owner=root group=root mode=0644
+- name: New node
+  systemd:
+    name: mariadb
+    state: restarted

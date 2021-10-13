@@ -1,0 +1,33 @@
+pipeline {
+  agent any
+  options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3'))
+  }
+   parameters{
+        string(description: 'version in jfrog', name: 'APP_VER')
+          }
+    stages {
+        stage('Download app from Jfrog') {
+            steps {
+                rtDownload (
+                    serverId: 'JFrog',
+                    spec: '''{
+                        "files": [
+                            {
+                                "pattern": "myfirstrepo/Ver.${APP_VER}/gitbucket.war",
+                                "target": "download/"
+                            }
+                        ]
+                    }'''
+                )
+            }
+        }
+    }
+    post{
+        success{
+                deploy adapters: [tomcat9(credentialsId: 'TomCat', path: '', url: 'http://10.26.0.226:8080/')],
+                contextPath: null, war: "download/Ver.${APP_VER}/gitbucket.war"
+                }
+        }
+}

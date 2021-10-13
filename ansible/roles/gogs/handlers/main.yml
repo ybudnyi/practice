@@ -1,0 +1,7 @@
+---
+# handlers file for gogs
+- name: Start mariadb
+  systemd:
+    name: mariadb
+    state: started
+    enabled: yes

@@ -1,0 +1,7 @@
+---
+- name: Gogs role install
+  hosts: app
+  become: true
+  gather_facts: True
+  roles:
+    - gogs

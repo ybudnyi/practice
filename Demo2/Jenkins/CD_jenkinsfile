@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3'))
+}
+    stages {
+        stage('GET SOURCE FROM GIT') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ybudnyi/demo2.git'
+            }
+        }
+        stage('BUILD IMAGES') {
+            steps {
+                sh "/usr/local/bin/docker-compose build"
+            }
+        }
+        stage('RUN SERVICES') {
+            steps {
+                sh '/usr/local/bin/docker-compose up -d'
+            }
+        }
+        stage('TEST IF SERVICE IS RUNNING') {
+            steps {
+                sh 'sleep 90'
+                sh './check_script.sh'
+            }
+        }
+        stage('PUSH WORK IMAGE TO REGISTRY') {
+            steps {
+                sh '/usr/bin/docker tag dashvis:${BUILD_ID} myregistry.domain.com/dashvis:${BUILD_ID}'
+                sh '/usr/bin/docker push myregistry.domain.com/dashvis:${BUILD_ID}'
+            }
+        }
+        stage('CLEAN WORKSPACE') {
+            steps {
+                sh './imgrm.sh'
+            }
+        }
+    }
+    post { 
+        always { 
+            cleanWs()
+        }
+        success{
+                        build job: 'Dashvis_CD', parameters: [string(name: 'TAG', value: "${env.BUILD_ID}")] , propagate: false
+                }
+    }
+}

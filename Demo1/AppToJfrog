@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3'))
+}
+    environment {
+        scannerHome = tool 'sonarscaner'
+    }
+    stages {
+        stage('GET SOURCE FROM GIT') {
+            steps {
+                git 'https://github.com/gitbucket/gitbucket.git'
+            }
+        }
+        stage('COMPILE APP') {
+            steps {
+                sh "/usr/bin/sbt compile"
+            }
+        }
+        stage('RUN TESTS') {
+            steps {
+                sh 'echo "==========Tests=========="'
+                sh '/usr/bin/sbt test'
+            
+            }
+        }
+        stage('CODE INSPECTION WITH SONARQUBE') {
+            steps {
+                withSonarQubeEnv('SonaQube') {
+                    sh '${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=deployapp \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://10.26.0.196:9000 \
+                        -Dsonar.login=49c8c3546235b9a406a55adc984aedcb81150e50 \
+                        -Dsonar.java.binaries=target'
+                }
+            }
+        }
+
+        stage('BUILD WAR FOR DEPLOYING') {
+            steps {
+                sh 'echo "==========Deploy=========="'
+                sh '/usr/bin/sbt executable'
+            }
+        }
+        stage('UPLOAD WAR TO ARTIFACTORY') {
+        steps {
+            script { 
+                def server = Artifactory.server 'JFrog'
+                def uploadSpec = """{
+                    "files": [{
+                        "pattern": "target/executable/gitbucket.war",
+                        "target": "myfirstrepo/Ver.${env.BUILD_ID}/"
+                    }]
+                }"""
+
+                server.upload(uploadSpec) 
+            }
+            }
+        }
+    }
+    post{
+                success{
+                        build job: 'AppToTomcat', parameters: [string(name: 'APP_VER', value: "${env.BUILD_ID}")] , propagate: false
+                }
+        }
+}

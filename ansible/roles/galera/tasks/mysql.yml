@@ -1,0 +1,9 @@
+---
+- name: Initialize new cluster
+  command: galera_new_cluster
+  when: inventory_hostname == "{{ main_host }}"
+- name: Add other nodes to galera cluster
+  systemd:
+    name: mariadb
+    state: restarted
+  when: inventory_hostname != "{{ main_host }}"

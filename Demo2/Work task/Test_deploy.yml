@@ -1,0 +1,44 @@
+version: '3'
+services:
+    db:
+#        build: ./db
+        image: myregistry.domain.com/postgresql:new
+        volumes:
+            - postgre_db:/var/lib/postgresql/data
+        networks:
+            - app
+        environment: 
+            POSTGRES_PASSWORD: 1111
+            POSTGRES_USER: postgres
+            POSTGRES_HOST_AUTH_METHOD: trust
+    ruby:
+#        build: ./ruby
+        build: .
+        depends_on:
+            - db
+#        restart: always
+        image: dashvis:${BUILD_ID}
+        ports:
+            - 3000:3000/tcp
+        networks:
+            - app
+        env_file:
+            - .env
+        environment: 
+            PORT: 3000
+            RAILS_SERVE_STATIC_FILES: "true"
+            DB_USERNAME: postgres
+            DB_PASSWORD: 1111
+            DB_DATABASE: app
+            DB_HOST: db
+            RAILS_ENV: production
+        healthcheck:
+          test: curl localhost:3000 || echo 1
+          interval: 10s
+          timeout: 5s
+          retries: 5
+volumes:
+    postgre_db:
+
+networks:
+    app:

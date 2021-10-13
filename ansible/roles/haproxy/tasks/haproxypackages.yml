@@ -1,0 +1,9 @@
+---
+- name: install tools
+  yum:
+    name: epel-release
+    state: present
+- name: install the latest version of HaProxy
+  yum:
+    name: haproxy
+    state: present

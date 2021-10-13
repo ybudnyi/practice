@@ -1,0 +1,11 @@
+---
+- name: Downaload Go 
+  get_url:
+    url: "https://golang.org/dl/go1.16.6.linux-amd64.tar.gz"
+    dest: "/root/go.tar.gz"
+    mode: "0664"
+- name: Unzip Go 
+  shell:
+    cmd: "tar -C /usr/local -xzf /root/go.tar.gz"
+  args:
+    chdir: /root

@@ -1,0 +1,10 @@
+---
+- name: 'inventory'
+  hosts: all
+  tasks:
+    - name: inventory
+      debug: var={{inventory_hostname}}
+    - name: ansible
+      debug: var={{ansible_hostname}}
+    - name: show vars
+      debug: var="{{ ['ansible_default_ipv4']['address'] }}"

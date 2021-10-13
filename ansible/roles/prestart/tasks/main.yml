@@ -1,0 +1,21 @@
+---
+# tasks file for prestart---
+- name: Set host name
+  hostname:
+    name: "{{ inventory_hostname }}" 
+- name: Install python for tools
+  yum:
+    name: python3
+    state: present
+- name: Instal for Disable SeLinux
+  yum:
+    name: ['python3-libselinux', 'python3-libsemanage']
+    state: latest
+- name: Disable after reboot
+  selinux:
+    state: disabled
+- name: Set SeLinux in permisive mode
+  selinux:
+    state: permissive
+
+

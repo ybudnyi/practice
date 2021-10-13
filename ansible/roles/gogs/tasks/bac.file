@@ -1,0 +1,117 @@
+---
+# tasks file for gogs
+- name: Install MariaDB-Galera-server
+  yum:
+    name: mariadb-server
+    update_cache: yes
+    state: present
+- name: Install git
+  yum:
+    name: git
+    state: present
+- name: Install gcc for app compiling
+  yum:
+    name: gcc
+    state: present
+- name: Install openssh server
+  yum:
+    name: openssh-server
+    state: present
+- name: Install wget
+  yum:
+    name: wget
+    state: present
+- name: Create DB for gogs app compile
+  mysql_db:
+    name: "gogs"
+    encoding: "utf8mb4"
+    collation: "utf8mb4_general_ci"
+    state: present
+  become: true
+- name: Downaload Go 
+  get_url:
+    url: "https://golang.org/dl/go1.16.6.linux-amd64.tar.gz"
+    dest: "/root/go.tar.gz"
+    mode: "0664"
+- name: Unzip Go 
+  unarchive:
+    src: "/root/go.tar.gz"
+    dest: "/usr/local"
+  environment:
+   "PATH=$PATH:/usr/local/go/bin"
+- name: Check Go installation
+  shell:
+    cmd: "go version"
+  register: go_version
+- name: Show version
+  debug:
+    var: go_version
+- name: Add user git
+  user:
+    name: "git"
+    comment: "Gogs"
+- name: Clone git repository
+  git:
+    repo: "https://github.com/gogs/gogs.git"
+    dest: "/root/gogs"
+    depth: 1
+- name: Start to build app
+  command: chdir=/root/gogs "go build -o gogs"
+#- name: Add config file for galera cluster
+#  template:
+---
+# tasks file for galera
+- name: Install MariaDB-Galera-server, MariaDB-client, Galera
+  yum:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  with_items:
+    - mariadb-server-galera
+    - mariadb-server
+    - galera
+- name: Instal tools for db configuration
+  yum:
+    name: python3-mysql
+    state: present
+- name: Add config file for galera cluster
+  template:
+    src=galera.cnf.j2
+    dest=/etc/my.cnf.d/galera.cnf
+    owner=root group=root mode=0644
+#  notify: Stop galera
+- name: Initialize new cluster
+  command: galera_new_cluster
+  when: inventory_hostname == "{{ main_host }}"
+- name: Add other nodes to galera cluster
+  systemd:
+    name: mariadb
+    state: restarted
+  when: inventory_hostname != "{{ main_host }}"
+- name: Create user git for app
+  community.mysql.mysql_user:
+    encrypted: no
+    name: "git"
+    host: "%"
+    password: "1111"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  become: true
+  no_log: true
+  run_once: true
+- name: Create user haproxy
+  community.mysql.mysql_user:
+    encrypted: no
+    name: "haproxy"
+    host: "10.26.0.232"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  become: true
+  no_log: true
+  run_once: true
+- name: Create db for gogs app
+  community.mysql.mysql_db:
+    name: "gogs"
+    encoding: "utf8mb4"
+    collation: "utf8mb4_general_ci"
+    state: present

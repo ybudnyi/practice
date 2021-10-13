@@ -1,0 +1,39 @@
+---
+- name: Create db for gogs app
+  community.mysql.mysql_db:
+    name: "{{ dbname }}"
+    encoding: "utf8mb4"
+    collation: "utf8mb4_general_ci"
+    state: present
+- name: Create user for app
+  community.mysql.mysql_user:
+    encrypted: no
+    name: "{{ user }}"
+    host: "%"
+    password: "{{ passwd }}"
+    priv: '{{ dbname }}.*:ALL,GRANT'
+    state: present
+  become: true
+  no_log: true
+  run_once: true
+- name: Create user haproxy
+  community.mysql.mysql_user:
+    encrypted: no
+    name: "haproxy"
+    host: "10.26.0.232"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  become: true
+  no_log: true
+  run_once: true
+- name: Create user admin for remote use
+  community.mysql.mysql_user:
+    encrypted: no
+    name: "admin"
+    host: "%"
+    priv: '*.*:ALL,GRANT'
+    password: "{{ lookup('password', 'deploy_pasword.txt') }}"
+    state: present
+  become: true
+  no_log: true
+  run_once: true

@@ -1,0 +1,6 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - ls
+      - /opt/sonar-scanner/bin/sonar-scanner -Dsonar.organization=ybudnyi -Dsonar.projectKey=Dashvis -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=de955f503aa4db82aad3dbf9ce5a1c8cceb1f54e

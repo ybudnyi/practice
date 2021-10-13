@@ -1,0 +1,24 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  labels:
+    app: dashvis
+    component: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashvis
+      component: db
+  template:
+    metadata:
+      name: db-pod
+      labels:
+        app: dashvis
+        component: db
+    spec:
+      containers:
+      - image: ybudnyi/demo2:db
+        name: db

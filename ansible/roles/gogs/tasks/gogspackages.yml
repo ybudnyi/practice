@@ -1,0 +1,26 @@
+---
+- name: Install mariadb-server for app installation
+  yum:
+    name: mariadb-server
+    update_cache: yes
+    state: present
+  notify:
+    - Start mariadb
+- name: Install tools
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - git
+    - gzip
+    - gcc
+    - wget
+    - openssh-server
+- name: Install python tools
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3
+    - epel-release
+    - python3-mysql

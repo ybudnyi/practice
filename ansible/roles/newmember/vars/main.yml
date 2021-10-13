@@ -1,0 +1,7 @@
+---
+hostname: mariadb4
+galera_cluster: gogs
+galera_nodes:
+  - "10.26.0.194"
+  - "10.26.0.156"
+  - "10.26.0.206"

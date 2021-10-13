@@ -1,0 +1,43 @@
+---
+- name: Clone git repository
+  git:
+    repo: "https://github.com/gogs/gogs.git"
+    dest: "/root/gogs"
+    depth: 1
+- name: Start app building
+  shell:
+    cmd: "/usr/local/go/bin/go build -o gogs"
+  args:
+    chdir: /root/gogs
+- name: Create directory for custom config
+  file:
+    path: /root/gogs/custom/conf
+    state: directory
+- name: Add config file for gogs
+  template:
+    src=app.ini.j2
+    dest=/root/gogs/custom/conf/app.ini
+    owner=root group=root mode=0644
+- name: Add service unit for systemd
+  copy:
+    src=gogs.service
+    dest=/etc/systemd/system
+    owner=root group=root mode=0644
+- name: Create directory for app
+  shell:
+    cmd: "mkdir /home/git/gogs"
+- name: Move gogs to git directory
+  shell:
+    cmd: "mv gogs /home/git"
+  args:
+    chdir: /root
+- name: Change owner of gogs directory for user git
+  shell:
+    cmd: "chown -R git:git gogs"
+  args:
+    chdir: /home/git
+- name: Start gogs service
+  systemd:
+    name: gogs
+    state: started
+    enabled: yes

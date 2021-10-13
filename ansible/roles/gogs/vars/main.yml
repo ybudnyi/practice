@@ -1,0 +1,5 @@
+---
+# vars file for gogs
+dbtype: mysql
+dbconnect: 10.26.0.232
+comment: Gogs

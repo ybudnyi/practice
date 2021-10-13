@@ -1,0 +1,9 @@
+---
+# vars file for haproxy
+my_db_hosts:
+  - name: mariadb1
+    address: 10.26.0.194
+  - name: mariadb2
+    address: 10.26.0.156
+  - name: mariadb3
+    address: 10.26.0.206

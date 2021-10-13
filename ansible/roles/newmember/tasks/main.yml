@@ -1,0 +1,12 @@
+---
+- block:
+    - name: Set host name
+      hostname:
+        name: "{{ inventory_hostname }}" 
+    - include: packages.yml
+    - include: firewall.yml
+    - include: configgalera.yml
+  when: inventory_hostname is match ("new-*")
+- block:
+    - include: confighaproxy.yml
+  when: inventory_hostname == "haproxy"

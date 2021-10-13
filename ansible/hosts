@@ -1,0 +1,13 @@
+[haproxy]
+haproxy ansible_host=10.26.0.232
+[galera]
+mariadb1 ansible_host=10.26.0.194
+mariadb2 ansible_host=10.26.0.156
+mariadb3 ansible_host=10.26.0.206
+#new-member1 ansible_host=
+#new-member2 ansible_host=
+[app]
+gogs ansible_host=10.26.0.178
+#[newmember:children]
+#haproxy
+#galera

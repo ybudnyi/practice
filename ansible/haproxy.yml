@@ -1,0 +1,7 @@
+---
+- name: Haproxy role install
+  hosts: haproxy
+  become: true
+  gather_facts: True
+  roles:
+    - haproxy

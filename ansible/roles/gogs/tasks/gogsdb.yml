@@ -1,0 +1,7 @@
+---
+- name: Create DB for gogs app compile
+  community.mysql.mysql_db:
+    name: "{{ dbname }}"
+    encoding: "utf8mb4"
+    collation: "utf8mb4_general_ci"
+    state: present

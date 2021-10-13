@@ -1,0 +1,14 @@
+---
+- name: Install packages for galera cluster
+  yum:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  loop:
+    - mariadb-server
+    - mariadb-server-galera
+    - galera
+- name: Instal tools for db configuration
+  yum:
+    name: python3-mysql
+    state: present

@@ -1,0 +1,6 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+{% for dbnode in groups['galera'] %}
+{{ hostvars[dbnode]['ansible_default_ipv4']['address'] }}  {{ hostvars[dbnode]['inventory_hostname'] }} 
+{% endfor %}

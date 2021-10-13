@@ -1,0 +1,78 @@
+version: '3'
+services:
+    nginx:
+        image: myregistry.domain.com/nginx:my
+        ports:
+            - "80:80"
+        networks:
+            - app
+            - logs
+        depends_on:
+            - ruby
+        logging:
+            driver: "fluentd"
+            options:
+              fluentd-address: localhost:24224
+              tag: service.nginx_1
+    redis:
+        image: myregistry.domain.com/redis:my
+        networks:
+            - app
+            - logs
+        logging:
+            driver: "fluentd"
+            options:
+              fluentd-address: localhost:24224
+              tag: service.redis_1
+    db:
+        image: myregistry.domain.com/postgresql:new
+        container_name: db_postgre
+        volumes:
+            - postgre_db:/var/lib/postgresql/data
+        networks:
+            - app
+            - logs
+        env_file:
+            - /root/configdb/.env
+        environment:    
+            POSTGRES_HOST_AUTH_METHOD: trust
+        logging:
+            driver: "fluentd"
+            options:
+              fluentd-address: localhost:24224
+              tag: service.db_1
+    ruby:
+        depends_on:
+            - db
+        image: myregistry.domain.com/dashvis:${TAG}
+        container_name: app_dashvis
+        volumes:
+            - /log:/demo2/log
+#        ports:
+#            - 3000:3000/tcp
+        networks:
+            - app
+            - logs
+        env_file:
+            - /root/config/.env
+        environment:
+            PORT: 3000
+            RAILS_SERVE_STATIC_FILES: "true"
+            DB_HOST: db
+            RAILS_ENV: production
+        healthcheck:
+          test: curl localhost:3000 || echo 1
+          interval: 10s
+          timeout: 5s
+          retries: 5
+        logging:
+            driver: "fluentd"
+            options:
+              fluentd-address: localhost:24224
+              tag: service.ruby_1
+volumes:
+    postgre_db:
+
+networks:
+    app:
+    logs:
